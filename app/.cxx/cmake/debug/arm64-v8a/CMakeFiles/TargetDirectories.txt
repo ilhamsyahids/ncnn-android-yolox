@@ -1,0 +1,3 @@
+/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/.cxx/cmake/debug/arm64-v8a/CMakeFiles/rebuild_cache.dir
+/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/.cxx/cmake/debug/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/.cxx/cmake/debug/arm64-v8a/CMakeFiles/ncnnyolox.dir

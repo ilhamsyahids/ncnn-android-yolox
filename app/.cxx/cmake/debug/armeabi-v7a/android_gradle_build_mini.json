@@ -1,0 +1,34 @@
+{
+  "buildFiles": [
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/SPIRVTargets-release.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/OSDependentTargets.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/OGLCompilerTargets-release.cmake",
+    "/Users/ilhamsyahids/Library/Android/sdk/ndk/22.0.7026061/build/cmake/android.toolchain.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/sdk/native/jni/OpenCVConfig-version.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/ncnn/ncnn.cmake",
+    "/Users/ilhamsyahids/Library/Android/sdk/ndk/22.0.7026061/build/cmake/platforms.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/CMakeLists.txt",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/sdk/native/jni/OpenCVModules_armeabi_v7a.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/sdk/native/jni/OpenCVConfig.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/ncnn/ncnn-release.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/ncnn/ncnnConfig.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/sdk/native/jni/OpenCVModules_armeabi_v7a-release.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/glslangTargets-release.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/glslangTargets.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/OGLCompilerTargets.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/OSDependentTargets-release.cmake",
+    "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/armeabi-v7a/lib/cmake/SPIRVTargets.cmake"
+  ],
+  "cleanCommands": [
+    "/Users/ilhamsyahids/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja -C \"/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/.cxx/cmake/debug/armeabi-v7a\" clean"
+  ],
+  "buildTargetsCommand": "/Users/ilhamsyahids/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja -C \"/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/.cxx/cmake/debug/armeabi-v7a\" {LIST_OF_TARGETS_TO_BUILD}",
+  "libraries": {
+    "ncnnyolox-Debug-armeabi-v7a": {
+      "artifactName": "ncnnyolox",
+      "buildCommand": "/Users/ilhamsyahids/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja -C \"/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/.cxx/cmake/debug/armeabi-v7a\" ncnnyolox",
+      "abi": "armeabi-v7a",
+      "output": "/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libncnnyolox.so"
+    }
+  }
+}

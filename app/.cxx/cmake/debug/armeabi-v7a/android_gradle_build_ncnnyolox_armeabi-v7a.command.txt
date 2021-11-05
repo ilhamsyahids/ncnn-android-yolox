@@ -1,0 +1,7 @@
+Executable : /Users/ilhamsyahids/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja
+arguments : 
+-C
+/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/.cxx/cmake/debug/armeabi-v7a
+ncnnyolox
+jvmArgs : 
+

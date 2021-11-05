@@ -1,0 +1,10 @@
+ninja: Entering directory `/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/.cxx/cmake/debug/x86'
+[1/4] Building CXX object CMakeFiles/ncnnyolox.dir/ndkcamera.cpp.o
+/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/ndkcamera.cpp:152:117: warning: format specifies type 'long' but the argument has type 'int64_t' (aka 'long long') [-Wformat]
+    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onCaptureSequenceCompleted %p %d %ld", session, sequenceId, frameNumber);
+                                                                                         ~~~                        ^~~~~~~~~~~
+                                                                                         %lld
+1 warning generated.
+[2/4] Building CXX object CMakeFiles/ncnnyolox.dir/yoloxncnn.cpp.o
+[3/4] Building CXX object CMakeFiles/ncnnyolox.dir/yolox.cpp.o
+[4/4] Linking CXX shared library /Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/build/intermediates/cmake/debug/obj/x86/libncnnyolox.so

@@ -1,0 +1,2 @@
+ninja: Entering directory `/Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/.cxx/cmake/debug/arm64-v8a'
+ninja: no work to do.
