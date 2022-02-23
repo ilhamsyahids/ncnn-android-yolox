@@ -1,7 +1,7 @@
 7767517
 226 268
 Input            images                   0 1 images
-YoloV5Focus      focus                    1 1 images 503
+YoloXFocus       focus                    1 1 images 503
 Convolution      Conv_41                  1 1 503 877 0=24 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=1 6=2592
 Swish            Mul_43                   1 1 877 507
 Convolution      Conv_44                  1 1 507 880 0=48 1=3 11=3 2=1 12=1 3=2 13=2 4=1 14=1 15=1 16=1 5=1 6=10368

@@ -19,18 +19,16 @@
 
 #include "cpu.h"
 
-
-
-// YOLOX use the same focus in yolov5
-class YoloV5Focus : public ncnn::Layer
+// Focus YOLOX
+class YoloXFocus : public ncnn::Layer
 {
 public:
-    YoloV5Focus()
+    YoloXFocus()
     {
         one_blob_only = true;
     }
 
-    virtual int forward(const ncnn::Mat& bottom_blob, ncnn::Mat& top_blob, const ncnn::Option& opt) const
+    virtual int forward(const ncnn::Mat &bottom_blob, ncnn::Mat &top_blob, const ncnn::Option &opt) const
     {
         int w = bottom_blob.w;
         int h = bottom_blob.h;
@@ -44,11 +42,11 @@ public:
         if (top_blob.empty())
             return -100;
 
-        #pragma omp parallel for num_threads(opt.num_threads)
+#pragma omp parallel for num_threads(opt.num_threads)
         for (int p = 0; p < outc; p++)
         {
-            const float* ptr = bottom_blob.channel(p % channels).row((p / channels) % 2) + ((p / channels) / 2);
-            float* outptr = top_blob.channel(p);
+            const float *ptr = bottom_blob.channel(p % channels).row((p / channels) % 2) + ((p / channels) / 2);
+            float *outptr = top_blob.channel(p);
 
             for (int i = 0; i < outh; i++)
             {
@@ -68,8 +66,7 @@ public:
     }
 };
 
-DEFINE_LAYER_CREATOR(YoloV5Focus)
-
+DEFINE_LAYER_CREATOR(YoloXFocus)
 
 struct GridAndStride
 {
@@ -78,13 +75,13 @@ struct GridAndStride
     int stride;
 };
 
-static inline float intersection_area(const Object& a, const Object& b)
+static inline float intersection_area(const Object &a, const Object &b)
 {
     cv::Rect_<float> inter = a.rect & b.rect;
     return inter.area();
 }
 
-static void qsort_descent_inplace(std::vector<Object>& faceobjects, int left, int right)
+static void qsort_descent_inplace(std::vector<Object> &faceobjects, int left, int right)
 {
     int i = left;
     int j = right;
@@ -108,20 +105,22 @@ static void qsort_descent_inplace(std::vector<Object>& faceobjects, int left, in
         }
     }
 
-    #pragma omp parallel sections
+#pragma omp parallel sections
     {
-        #pragma omp section
+#pragma omp section
         {
-            if (left < j) qsort_descent_inplace(faceobjects, left, j);
+            if (left < j)
+                qsort_descent_inplace(faceobjects, left, j);
         }
-        #pragma omp section
+#pragma omp section
         {
-            if (i < right) qsort_descent_inplace(faceobjects, i, right);
+            if (i < right)
+                qsort_descent_inplace(faceobjects, i, right);
         }
     }
 }
 
-static void qsort_descent_inplace(std::vector<Object>& objects)
+static void qsort_descent_inplace(std::vector<Object> &objects)
 {
     if (objects.empty())
         return;
@@ -129,7 +128,7 @@ static void qsort_descent_inplace(std::vector<Object>& objects)
     qsort_descent_inplace(objects, 0, objects.size() - 1);
 }
 
-static void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vector<int>& picked, float nms_threshold)
+static void nms_sorted_bboxes(const std::vector<Object> &faceobjects, std::vector<int> &picked, float nms_threshold)
 {
     picked.clear();
 
@@ -143,12 +142,12 @@ static void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vecto
 
     for (int i = 0; i < n; i++)
     {
-        const Object& a = faceobjects[i];
+        const Object &a = faceobjects[i];
 
         int keep = 1;
         for (int j = 0; j < (int)picked.size(); j++)
         {
-            const Object& b = faceobjects[picked[j]];
+            const Object &b = faceobjects[picked[j]];
 
             // intersection over union
             float inter_area = intersection_area(a, b);
@@ -163,7 +162,7 @@ static void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vecto
     }
 }
 
-static int generate_grids_and_stride(const int target_size, std::vector<int>& strides, std::vector<GridAndStride>& grid_strides)
+static int generate_grids_and_stride(const int target_size, std::vector<int> &strides, std::vector<GridAndStride> &grid_strides)
 {
     for (auto stride : strides)
     {
@@ -172,11 +171,10 @@ static int generate_grids_and_stride(const int target_size, std::vector<int>& st
         {
             for (int g0 = 0; g0 < num_grid; g0++)
             {
-               // __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "aaaaaaaaaaaaaa");
-
+                // __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "aaaaaaaaaaaaaa");
 
                 grid_strides.push_back((GridAndStride){g0, g1, stride});
-               // __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "bbbbbbbbbbbbbbbbbbb");
+                // __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "bbbbbbbbbbbbbbbbbbb");
             }
         }
     }
@@ -184,7 +182,7 @@ static int generate_grids_and_stride(const int target_size, std::vector<int>& st
     return 0;
 }
 
-static void generate_yolox_proposals(std::vector<GridAndStride> grid_strides, const ncnn::Mat& feat_blob, float prob_threshold, std::vector<Object>& objects)
+static void generate_yolox_proposals(std::vector<GridAndStride> grid_strides, const ncnn::Mat &feat_blob, float prob_threshold, std::vector<Object> &objects)
 {
     const int num_grid = feat_blob.h;
     fprintf(stderr, "output height: %d, width: %d, channels: %d, dims:%d\n", feat_blob.h, feat_blob.w, feat_blob.c, feat_blob.dims);
@@ -193,7 +191,7 @@ static void generate_yolox_proposals(std::vector<GridAndStride> grid_strides, co
 
     const int num_anchors = grid_strides.size();
 
-    const float* feat_ptr = feat_blob.channel(0);
+    const float *feat_ptr = feat_blob.channel(0);
     for (int anchor_idx = 0; anchor_idx < num_anchors; anchor_idx++)
     {
         const int grid0 = grid_strides[anchor_idx].grid0;
@@ -233,15 +231,14 @@ static void generate_yolox_proposals(std::vector<GridAndStride> grid_strides, co
 
     } // point anchor loop
 }
- 
- 
+
 Yolox::Yolox()
 {
     blob_pool_allocator.set_size_compare_ratio(0.f);
     workspace_pool_allocator.set_size_compare_ratio(0.f);
 }
 
-int Yolox::load(const char* modeltype, int _target_size, const float* _mean_vals, const float* _norm_vals, bool use_gpu)
+int Yolox::load(const char *modeltype, int _target_size, const float *_mean_vals, const float *_norm_vals, bool use_gpu)
 {
     yolox.clear();
     blob_pool_allocator.clear();
@@ -255,7 +252,7 @@ int Yolox::load(const char* modeltype, int _target_size, const float* _mean_vals
 #if NCNN_VULKAN
     yolox.opt.use_vulkan_compute = use_gpu;
 #endif
-    yolox.register_custom_layer("YoloV5Focus", YoloV5Focus_layer_creator);
+    yolox.register_custom_layer("YoloXFocus", YoloXFocus_layer_creator);
     yolox.opt.num_threads = ncnn::get_big_cpu_count();
     yolox.opt.blob_allocator = &blob_pool_allocator;
     yolox.opt.workspace_allocator = &workspace_pool_allocator;
@@ -279,7 +276,7 @@ int Yolox::load(const char* modeltype, int _target_size, const float* _mean_vals
     return 0;
 }
 
-int Yolox::load(AAssetManager* mgr, const char* modeltype, int _target_size, const float* _mean_vals, const float* _norm_vals, bool use_gpu)
+int Yolox::load(AAssetManager *mgr, const char *modeltype, int _target_size, const float *_mean_vals, const float *_norm_vals, bool use_gpu)
 {
     yolox.clear();
     blob_pool_allocator.clear();
@@ -292,7 +289,7 @@ int Yolox::load(AAssetManager* mgr, const char* modeltype, int _target_size, con
 #if NCNN_VULKAN
     yolox.opt.use_vulkan_compute = use_gpu;
 #endif
-    yolox.register_custom_layer("YoloV5Focus", YoloV5Focus_layer_creator);
+    yolox.register_custom_layer("YoloXFocus", YoloXFocus_layer_creator);
     yolox.opt.num_threads = ncnn::get_big_cpu_count();
     yolox.opt.blob_allocator = &blob_pool_allocator;
     yolox.opt.workspace_allocator = &workspace_pool_allocator;
@@ -305,7 +302,6 @@ int Yolox::load(AAssetManager* mgr, const char* modeltype, int _target_size, con
     yolox.load_param(mgr, parampath);
     yolox.load_model(mgr, modelpath);
 
-
     target_size = _target_size;
     mean_vals[0] = _mean_vals[0];
     mean_vals[1] = _mean_vals[1];
@@ -317,8 +313,7 @@ int Yolox::load(AAssetManager* mgr, const char* modeltype, int _target_size, con
     return 0;
 }
 
-
-int Yolox::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob_threshold, float nms_threshold)
+int Yolox::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_threshold, float nms_threshold)
 {
 
     int img_w = rgb.cols;
@@ -345,8 +340,8 @@ int Yolox::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob_t
 
     // pad to target_size rectangle
     // yolov5/utils/datasets.py letterbox
-    int wpad = target_size-w;//(w + 31) / 32 * 32 - w;
-    int hpad = target_size-h;//(h + 31) / 32 * 32 - h;
+    int wpad = target_size - w; //(w + 31) / 32 * 32 - w;
+    int hpad = target_size - h; //(h + 31) / 32 * 32 - h;
     ncnn::Mat in_pad;
     ncnn::copy_make_border(in, in_pad, 0, hpad, 0, wpad, ncnn::BORDER_CONSTANT, 114.f);
 
@@ -404,45 +399,49 @@ int Yolox::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob_t
     return 0;
 }
 
-int Yolox::draw(cv::Mat& rgb, const std::vector<Object>& objects)
+int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects)
 {
-    static const char* class_names[] = {
-            "glass", "metal", "paper", "plastic"
+    static const char *class_names[] = {
+        "glass",
+        "metal",
+        "paper",
+        "plastic",
     };
+
     static const unsigned char colors[19][3] = {
-        { 54,  67, 244},
-        { 99,  30, 233},
-        {176,  39, 156},
-        {183,  58, 103},
-        {181,  81,  63},
-        {243, 150,  33},
-        {244, 169,   3},
-        {212, 188,   0},
-        {136, 150,   0},
-        { 80, 175,  76},
-        { 74, 195, 139},
-        { 57, 220, 205},
-        { 59, 235, 255},
-        {  7, 193, 255},
-        {  0, 152, 255},
-        { 34,  87, 255},
-        { 72,  85, 121},
+        {54, 67, 244},
+        {99, 30, 233},
+        {176, 39, 156},
+        {183, 58, 103},
+        {181, 81, 63},
+        {243, 150, 33},
+        {244, 169, 3},
+        {212, 188, 0},
+        {136, 150, 0},
+        {80, 175, 76},
+        {74, 195, 139},
+        {57, 220, 205},
+        {59, 235, 255},
+        {7, 193, 255},
+        {0, 152, 255},
+        {34, 87, 255},
+        {72, 85, 121},
         {158, 158, 158},
-        {139, 125,  96}
+        {139, 125, 96},
     };
 
     int color_index = 0;
 
     for (size_t i = 0; i < objects.size(); i++)
     {
-        const Object& obj = objects[i];
+        const Object &obj = objects[i];
 
-        const unsigned char* color = colors[color_index % 19];
+        const unsigned char *color = colors[color_index % 19];
         color_index++;
 
         cv::Scalar cc(color[0], color[1], color[2]);
 
-        cv::rectangle(rgb,obj.rect, cc, 2);
+        cv::rectangle(rgb, obj.rect, cc, 2);
 
         char text[256];
         sprintf(text, "%s %.1f%%", class_names[obj.label], obj.prob * 100);
@@ -462,9 +461,7 @@ int Yolox::draw(cv::Mat& rgb, const std::vector<Object>& objects)
         cv::Scalar textcc = (color[0] + color[1] + color[2] >= 381) ? cv::Scalar(0, 0, 0) : cv::Scalar(255, 255, 255);
 
         cv::putText(rgb, text, cv::Point(x, y + label_size.height), cv::FONT_HERSHEY_SIMPLEX, 0.5, textcc, 1);
-
     }
-    
-    
+
     return 0;
 }
