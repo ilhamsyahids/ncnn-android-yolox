@@ -37,7 +37,7 @@
 #include <arm_neon.h>
 #endif // __ARM_NEON
 
-static int draw_unsupported(cv::Mat& rgb)
+static int draw_unsupported(cv::Mat &rgb)
 {
     const char text[] = "unsupported";
 
@@ -48,7 +48,7 @@ static int draw_unsupported(cv::Mat& rgb)
     int x = (rgb.cols - label_size.width) / 2;
 
     cv::rectangle(rgb, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
-                    cv::Scalar(255, 255, 255), -1);
+                  cv::Scalar(255, 255, 255), -1);
 
     cv::putText(rgb, text, cv::Point(x, y + label_size.height),
                 cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0));
@@ -56,7 +56,7 @@ static int draw_unsupported(cv::Mat& rgb)
     return 0;
 }
 
-static int draw_fps(cv::Mat& rgb)
+static int draw_fps(cv::Mat &rgb)
 {
     // resolve moving average
     float avg_fps = 0.f;
@@ -102,7 +102,7 @@ static int draw_fps(cv::Mat& rgb)
     int x = rgb.cols - label_size.width;
 
     cv::rectangle(rgb, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
-                    cv::Scalar(255, 255, 255), -1);
+                  cv::Scalar(255, 255, 255), -1);
 
     cv::putText(rgb, text, cv::Point(x, y + label_size.height),
                 cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
@@ -110,16 +110,16 @@ static int draw_fps(cv::Mat& rgb)
     return 0;
 }
 
-static Yolox* g_yolox = 0;
+static Yolox *g_yolox = 0;
 static ncnn::Mutex lock;
 
 class MyNdkCamera : public NdkCameraWindow
 {
 public:
-    virtual void on_image_render(cv::Mat& rgb) const;
+    virtual void on_image_render(cv::Mat &rgb) const;
 };
 
-void MyNdkCamera::on_image_render(cv::Mat& rgb) const
+void MyNdkCamera::on_image_render(cv::Mat &rgb) const
 {
     // nanodet
     {
@@ -141,128 +141,128 @@ void MyNdkCamera::on_image_render(cv::Mat& rgb) const
     draw_fps(rgb);
 }
 
-static MyNdkCamera* g_camera = 0;
+static MyNdkCamera *g_camera = 0;
 
-extern "C" {
-
-JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved)
+extern "C"
 {
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "JNI_OnLoad");
 
-    g_camera = new MyNdkCamera;
-
-    return JNI_VERSION_1_4;
-}
-
-JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved)
-{
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "JNI_OnUnload");
-
+    JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     {
-        ncnn::MutexLockGuard g(lock);
+        __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "JNI_OnLoad");
 
-        delete g_yolox;
-        g_yolox = 0;
+        g_camera = new MyNdkCamera;
+
+        return JNI_VERSION_1_4;
     }
 
-    delete g_camera;
-    g_camera = 0;
-}
-
-// public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu);
-JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv* env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu)
-{
-    if (modelid < 0 || modelid > 6 || cpugpu < 0 || cpugpu > 1)
+    JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved)
     {
-        return JNI_FALSE;
-    }
+        __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "JNI_OnUnload");
 
-    AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
-
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "loadModel %p", mgr);
-
-    const char* modeltypes[] =
-    {
-        "yolox-tiny",
-        "yolox-nano",
-    };
-
-    const int target_sizes[] =
-    {
-        416,
-        416,
-    };
-
-    const float mean_vals[][3] =
-    {
-        {255.f * 0.485f, 255.f * 0.456, 255.f * 0.406f},
-        {255.f * 0.485f, 255.f * 0.456, 255.f * 0.406f},
-    };
-
-    const float norm_vals[][3] =
-    {
-        {1 / (255.f * 0.229f), 1 / (255.f * 0.224f), 1 / (255.f * 0.225f)},
-        {1 / (255.f * 0.229f), 1 / (255.f * 0.224f), 1 / (255.f * 0.225f)},
-    };
-
-    const char* modeltype = modeltypes[(int)modelid];
-    int target_size = target_sizes[(int)modelid];
-    bool use_gpu = (int)cpugpu == 1;
-
-    // reload
-    {
-        ncnn::MutexLockGuard g(lock);
-
-        if (use_gpu && ncnn::get_gpu_count() == 0)
         {
-            // no gpu
+            ncnn::MutexLockGuard g(lock);
+
             delete g_yolox;
             g_yolox = 0;
         }
-        else
-        {
-            if (!g_yolox)
-                g_yolox = new Yolox;
-            g_yolox->load(mgr, modeltype, target_size, mean_vals[(int)modelid], norm_vals[(int)modelid], use_gpu);
-        }
+
+        delete g_camera;
+        g_camera = 0;
     }
 
-    return JNI_TRUE;
-}
+    // public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu);
+    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu)
+    {
+        if (modelid < 0 || modelid > 6 || cpugpu < 0 || cpugpu > 1)
+        {
+            return JNI_FALSE;
+        }
 
-// public native boolean openCamera(int facing);
-JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_openCamera(JNIEnv* env, jobject thiz, jint facing)
-{
-    if (facing < 0 || facing > 1)
-        return JNI_FALSE;
+        AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
 
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "openCamera %d", facing);
+        __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "loadModel %p", mgr);
 
-    g_camera->open((int)facing);
+        const char *modeltypes[] =
+            {
+                "yolox-tiny",
+                "yolox-nano",
+            };
 
-    return JNI_TRUE;
-}
+        const int target_sizes[] =
+            {
+                416,
+                416,
+            };
 
-// public native boolean closeCamera();
-JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_closeCamera(JNIEnv* env, jobject thiz)
-{
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "closeCamera");
+        const float mean_vals[][3] =
+            {
+                {255.f * 0.485f, 255.f * 0.456, 255.f * 0.406f},
+                {255.f * 0.485f, 255.f * 0.456, 255.f * 0.406f},
+            };
 
-    g_camera->close();
+        const float norm_vals[][3] =
+            {
+                {1 / (255.f * 0.229f), 1 / (255.f * 0.224f), 1 / (255.f * 0.225f)},
+                {1 / (255.f * 0.229f), 1 / (255.f * 0.224f), 1 / (255.f * 0.225f)},
+            };
 
-    return JNI_TRUE;
-}
+        const char *modeltype = modeltypes[(int)modelid];
+        int target_size = target_sizes[(int)modelid];
+        bool use_gpu = (int)cpugpu == 1;
 
-// public native boolean setOutputWindow(Surface surface);
-JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_setOutputWindow(JNIEnv* env, jobject thiz, jobject surface)
-{
-    ANativeWindow* win = ANativeWindow_fromSurface(env, surface);
+        // reload
+        {
+            ncnn::MutexLockGuard g(lock);
 
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "setOutputWindow %p", win);
+            if (use_gpu && ncnn::get_gpu_count() == 0)
+            {
+                // no gpu
+                delete g_yolox;
+                g_yolox = 0;
+            }
+            else
+            {
+                if (!g_yolox)
+                    g_yolox = new Yolox;
+                g_yolox->load(mgr, modeltype, target_size, mean_vals[(int)modelid], norm_vals[(int)modelid], use_gpu);
+            }
+        }
 
-    g_camera->set_window(win);
+        return JNI_TRUE;
+    }
 
-    return JNI_TRUE;
-}
+    // public native boolean openCamera(int facing);
+    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_openCamera(JNIEnv *env, jobject thiz, jint facing)
+    {
+        if (facing < 0 || facing > 1)
+            return JNI_FALSE;
 
+        __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "openCamera %d", facing);
+
+        g_camera->open((int)facing);
+
+        return JNI_TRUE;
+    }
+
+    // public native boolean closeCamera();
+    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_closeCamera(JNIEnv *env, jobject thiz)
+    {
+        __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "closeCamera");
+
+        g_camera->close();
+
+        return JNI_TRUE;
+    }
+
+    // public native boolean setOutputWindow(Surface surface);
+    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_setOutputWindow(JNIEnv *env, jobject thiz, jobject surface)
+    {
+        ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
+
+        __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "setOutputWindow %p", win);
+
+        g_camera->set_window(win);
+
+        return JNI_TRUE;
+    }
 }
