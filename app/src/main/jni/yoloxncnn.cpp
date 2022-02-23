@@ -183,8 +183,8 @@ JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv
 
     const char* modeltypes[] =
     {
-        "yolox-nano",
         "yolox-tiny",
+        "yolox-nano",
     };
 
     const int target_sizes[] =
