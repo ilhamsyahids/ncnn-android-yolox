@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">yolox_demo</string>
+    <string name="app_name">Waste Detection YOLOX NCNN</string>
     <string-array name="model_array">
         <item>yolox-tiny</item>
         <item>yolox-nano</item>
