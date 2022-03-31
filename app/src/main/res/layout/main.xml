@@ -36,6 +36,13 @@
         android:drawSelectorOnTop="true"
         android:entries="@array/cpugpu_array" />
 
+    <Spinner
+        android:id="@+id/spinnerJump"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawSelectorOnTop="true"
+        android:entries="@array/jump_array" />
+
     </LinearLayout>
 
     <SurfaceView

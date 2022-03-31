@@ -56,44 +56,55 @@ static int draw_unsupported(cv::Mat &rgb)
     return 0;
 }
 
-static int draw_fps(cv::Mat &rgb)
+class Fps
 {
-    // resolve moving average
-    float avg_fps = 0.f;
+protected:
+    unsigned int m_fps;
+    unsigned int m_fpscount;
+    double last_time;
+    double current_time;
+
+public:
+    // Constructor
+    Fps() : m_fps(0), m_fpscount(0), last_time(0.f), current_time(0.f)
     {
-        static double t0 = 0.f;
-        static float fps_history[10] = {0.f};
-
-        double t1 = ncnn::get_current_time();
-        if (t0 == 0.f)
-        {
-            t0 = t1;
-            return 0;
-        }
-
-        float fps = 1000.f / (t1 - t0);
-        t0 = t1;
-
-        for (int i = 9; i >= 1; i--)
-        {
-            fps_history[i] = fps_history[i - 1];
-        }
-        fps_history[0] = fps;
-
-        if (fps_history[9] == 0.f)
-        {
-            return 0;
-        }
-
-        for (int i = 0; i < 10; i++)
-        {
-            avg_fps += fps_history[i];
-        }
-        avg_fps /= 10.f;
     }
 
+    // Update
+    void update()
+    {
+        // increase the counter by one
+        m_fpscount++;
+
+        current_time = ncnn::get_current_time();
+
+        // one second elapsed? (= 1000 milliseconds)
+        if (current_time - last_time >= 1000)
+        {
+            // save the current counter value to m_fps
+            m_fps = m_fpscount;
+
+            // reset the counter and the interval
+            m_fpscount = 0;
+            last_time = current_time;
+        }
+    }
+
+    // Get fps
+    unsigned int get() const
+    {
+        return m_fps;
+    }
+};
+
+static Fps fps;
+
+static int draw_fps(cv::Mat &rgb)
+{
+    float avg_fps = (float)fps.get();
+
     char text[32];
-    sprintf(text, "FPS=%.2f", avg_fps);
+    sprintf(text, "FPS=%.0f", avg_fps);
 
     int baseLine = 0;
     cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
@@ -112,6 +123,8 @@ static int draw_fps(cv::Mat &rgb)
 
 static Yolox *g_yolox = 0;
 static ncnn::Mutex lock;
+static unsigned int n_count = 0;
+static unsigned int n_jump;
 
 class MyNdkCamera : public NdkCameraWindow
 {
@@ -121,16 +134,26 @@ public:
 
 void MyNdkCamera::on_image_render(cv::Mat &rgb) const
 {
+    fps.update();
+
     // nanodet
     {
         ncnn::MutexLockGuard g(lock);
 
+        std::vector<Object> objects;
+
         if (g_yolox)
         {
-            std::vector<Object> objects;
-            g_yolox->detect(rgb, objects);
+            if (n_count % n_jump == 0)
+            {
+                n_count = 0;
 
-            g_yolox->draw(rgb, objects);
+                g_yolox->detect(rgb, objects);
+
+                g_yolox->draw(rgb, objects);
+            }
+
+            n_count++;
         }
         else
         {
@@ -171,9 +194,9 @@ extern "C"
     }
 
     // public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu);
-    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu)
+    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu, jint jump)
     {
-        if (modelid < 0 || modelid > 6 || cpugpu < 0 || cpugpu > 1)
+        if (modelid < 0 || modelid > 6 || cpugpu < 0 || cpugpu > 1 || jump < 0 || jump > 9)
         {
             return JNI_FALSE;
         }
@@ -227,6 +250,8 @@ extern "C"
                 g_yolox->load(mgr, modeltype, target_size, mean_vals[(int)modelid], norm_vals[(int)modelid], use_gpu);
             }
         }
+
+        n_jump = jump + 1;
 
         return JNI_TRUE;
     }
