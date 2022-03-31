@@ -125,6 +125,7 @@ static Yolox *g_yolox = 0;
 static ncnn::Mutex lock;
 static unsigned int n_count = 0;
 static unsigned int n_jump;
+static std::vector<Object> objects;
 
 class MyNdkCamera : public NdkCameraWindow
 {
@@ -140,8 +141,6 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
     {
         ncnn::MutexLockGuard g(lock);
 
-        std::vector<Object> objects;
-
         if (g_yolox)
         {
             if (n_count % n_jump == 0)
@@ -149,9 +148,9 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
                 n_count = 0;
 
                 g_yolox->detect(rgb, objects);
-
-                g_yolox->draw(rgb, objects);
             }
+
+            g_yolox->draw(rgb, objects);
 
             n_count++;
         }
