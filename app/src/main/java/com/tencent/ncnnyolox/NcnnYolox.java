@@ -18,7 +18,7 @@ import android.content.res.AssetManager;
 import android.view.Surface;
 
 public class NcnnYolox {
-    public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu, int jump);
+    public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu, int samplingrate);
 
     public native boolean openCamera(int facing);
 

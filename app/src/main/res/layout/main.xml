@@ -37,11 +37,11 @@
         android:entries="@array/cpugpu_array" />
 
     <Spinner
-        android:id="@+id/spinnerJump"
+        android:id="@+id/spinnerRate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:drawSelectorOnTop="true"
-        android:entries="@array/jump_array" />
+        android:entries="@array/rate_array" />
 
     </LinearLayout>
 

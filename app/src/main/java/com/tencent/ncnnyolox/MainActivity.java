@@ -40,10 +40,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
     private Spinner spinnerModel;
     private Spinner spinnerCPUGPU;
-    private Spinner spinnerJump;
+    private Spinner spinnerRate;
     private int current_model = 0;
     private int current_cpugpu = 0;
-    private int current_jump = 0;
+    private int current_rate = 0;
 
     private SurfaceView cameraView;
 
@@ -105,12 +105,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             }
         });
 
-        spinnerJump = (Spinner) findViewById(R.id.spinnerJump);
-        spinnerJump.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinnerRate = (Spinner) findViewById(R.id.spinnerRate);
+        spinnerRate.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
-                if (position != current_jump) {
-                    current_jump = position;
+                if (position != current_rate) {
+                    current_rate = position;
                     reload();
                 }
             }
@@ -124,7 +124,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     private void reload() {
-        boolean ret_init = ncnnyolox.loadModel(getAssets(), current_model, current_cpugpu, current_jump);
+        boolean ret_init = ncnnyolox.loadModel(getAssets(), current_model, current_cpugpu, current_rate);
         if (!ret_init) {
             Log.e("MainActivity", "ncnnyolox loadModel failed");
         }
