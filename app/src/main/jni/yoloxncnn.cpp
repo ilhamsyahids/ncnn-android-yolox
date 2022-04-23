@@ -19,6 +19,7 @@
 #include <android/log.h>
 
 #include <jni.h>
+#include <pthread.h>
 
 #include <string>
 #include <vector>
@@ -97,6 +98,32 @@ public:
     }
 };
 
+static pthread_t thread;
+static JavaVM *jvm;
+static jobject jInstance;
+static jclass jClassInstance;
+static jmethodID callbackFunc;
+static JNIEnv *jnv;
+
+static void *sendResultInference(void *)
+{
+    int data = 10;
+
+    jvm->AttachCurrentThread(&jnv, NULL);
+
+    if (jClassInstance == NULL) {
+        jClassInstance = jnv->GetObjectClass(jInstance);
+    }
+
+    if (callbackFunc == NULL) {
+        callbackFunc = jnv->GetMethodID(jClassInstance, "callBack", "(I)V");
+    }
+
+    jnv->CallVoidMethod(jInstance, callbackFunc, data);
+
+    return NULL;
+}
+
 static Fps fps;
 
 static int draw_fps(cv::Mat &rgb)
@@ -148,6 +175,7 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
                 n_count = 0;
 
                 g_yolox->detect(rgb, objects);
+                sendResultInference(NULL);
             }
 
             g_yolox->draw(rgb, objects);
@@ -164,6 +192,13 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
 }
 
 static MyNdkCamera *g_camera = 0;
+
+static void setEnv(JNIEnv *env, jobject instance)
+{
+    jInstance = env->NewGlobalRef(instance);
+    env->GetJavaVM(&jvm);
+    pthread_create(&thread, NULL, sendResultInference, NULL);
+}
 
 extern "C"
 {
@@ -195,6 +230,8 @@ extern "C"
     // public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu);
     JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu, jint samplingrate)
     {
+        setEnv(env, thiz);
+
         if (modelid < 0 || modelid > 6 || cpugpu < 0 || cpugpu > 1 || samplingrate < 0 || samplingrate > 9)
         {
             return JNI_FALSE;
@@ -258,6 +295,8 @@ extern "C"
     // public native boolean openCamera(int facing);
     JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_openCamera(JNIEnv *env, jobject thiz, jint facing)
     {
+        setEnv(env, thiz);
+
         if (facing < 0 || facing > 1)
             return JNI_FALSE;
 
@@ -271,6 +310,8 @@ extern "C"
     // public native boolean closeCamera();
     JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_closeCamera(JNIEnv *env, jobject thiz)
     {
+        setEnv(env, thiz);
+
         __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "closeCamera");
 
         g_camera->close();
@@ -281,6 +322,8 @@ extern "C"
     // public native boolean setOutputWindow(Surface surface);
     JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_setOutputWindow(JNIEnv *env, jobject thiz, jobject surface)
     {
+        setEnv(env, thiz);
+
         ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
 
         __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "setOutputWindow %p", win);

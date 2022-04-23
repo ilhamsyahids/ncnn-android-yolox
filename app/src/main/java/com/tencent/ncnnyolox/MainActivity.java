@@ -20,7 +20,6 @@ import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -32,20 +31,15 @@ import android.widget.Spinner;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
-public class MainActivity extends Activity implements SurfaceHolder.Callback {
+public class MainActivity extends Activity implements SurfaceHolder.Callback, JNICallbackInterface {
     public static final int REQUEST_CAMERA = 100;
 
-    private NcnnYolox ncnnyolox = new NcnnYolox();
+    private final NcnnYolox ncnnyolox = new NcnnYolox(this);
     private int facing = 1;
 
-    private Spinner spinnerModel;
-    private Spinner spinnerCPUGPU;
-    private Spinner spinnerRate;
     private int current_model = 0;
     private int current_cpugpu = 0;
     private int current_rate = 0;
-
-    private SurfaceView cameraView;
 
     /** Called when the activity is first created. */
     @Override
@@ -55,7 +49,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        cameraView = (SurfaceView) findViewById(R.id.cameraview);
+        SurfaceView cameraView = (SurfaceView) findViewById(R.id.cameraview);
 
         cameraView.getHolder().setFormat(PixelFormat.RGBA_8888);
         cameraView.getHolder().addCallback(this);
@@ -75,7 +69,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             }
         });
 
-        spinnerModel = (Spinner) findViewById(R.id.spinnerModel);
+        Spinner spinnerModel = (Spinner) findViewById(R.id.spinnerModel);
         spinnerModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
@@ -90,7 +84,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             }
         });
 
-        spinnerCPUGPU = (Spinner) findViewById(R.id.spinnerCPUGPU);
+        Spinner spinnerCPUGPU = (Spinner) findViewById(R.id.spinnerCPUGPU);
         spinnerCPUGPU.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
@@ -105,7 +99,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             }
         });
 
-        spinnerRate = (Spinner) findViewById(R.id.spinnerRate);
+        Spinner spinnerRate = (Spinner) findViewById(R.id.spinnerRate);
         spinnerRate.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
@@ -160,5 +154,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         super.onPause();
 
         ncnnyolox.closeCamera();
+    }
+
+    @Override
+    public void callBackEvent(int data) {
+        Log.i("MainActivity callback", String.valueOf(data));
     }
 }
