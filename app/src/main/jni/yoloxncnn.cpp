@@ -104,6 +104,7 @@ static jobject jInstance;
 static jclass jClassInstance;
 static jmethodID callbackFunc;
 static JNIEnv *jnv;
+static unsigned int delegate_score = 1;
 
 static void *sendResultInference(void *)
 {
@@ -111,15 +112,17 @@ static void *sendResultInference(void *)
 
     jvm->AttachCurrentThread(&jnv, NULL);
 
-    if (jClassInstance == NULL) {
+    if (jClassInstance == NULL)
+    {
         jClassInstance = jnv->GetObjectClass(jInstance);
     }
 
-    if (callbackFunc == NULL) {
+    if (callbackFunc == NULL)
+    {
         callbackFunc = jnv->GetMethodID(jClassInstance, "callBack", "(I)V");
     }
 
-    jnv->CallVoidMethod(jInstance, callbackFunc, data);
+    jnv->CallVoidMethod(jInstance, callbackFunc, delegate_score);
 
     return NULL;
 }
@@ -168,6 +171,8 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
     {
         ncnn::MutexLockGuard g(lock);
 
+        delegate_score = 1;
+
         if (g_yolox)
         {
             if (n_count % n_rate == 0)
@@ -175,10 +180,11 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
                 n_count = 0;
 
                 g_yolox->detect(rgb, objects);
-                sendResultInference(NULL);
             }
 
-            g_yolox->draw(rgb, objects);
+            g_yolox->draw(rgb, objects, delegate_score);
+
+            sendResultInference(NULL);
 
             n_count++;
         }

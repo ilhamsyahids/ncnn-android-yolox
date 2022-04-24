@@ -399,7 +399,7 @@ int Yolox::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_t
     return 0;
 }
 
-int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects)
+int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects, unsigned int &delegate_score)
 {
     static const char *class_names[] = {
         "glass",
@@ -432,9 +432,17 @@ int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects)
 
     int color_index = 0;
 
+    std::vector<bool> objects_class = {0, 0, 0, 0};
+
     for (size_t i = 0; i < objects.size(); i++)
     {
         const Object &obj = objects[i];
+
+        if (!objects_class[obj.label])
+        {
+            objects_class[obj.label] = true;
+            delegate_score += pow(2, obj.label);
+        }
 
         const unsigned char *color = colors[color_index % 19];
         color_index++;
