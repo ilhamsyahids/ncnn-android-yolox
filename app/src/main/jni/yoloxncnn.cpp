@@ -129,12 +129,23 @@ static void *sendResultInference(void *)
 
 static Fps fps;
 
+double start_time = ncnn::get_current_time();
+float avg_fps = 0;
+int frame_counter = 0;
+
 static int draw_fps(cv::Mat &rgb)
 {
-    float avg_fps = (float)fps.get();
+    float spent_time = (ncnn::get_current_time() - start_time);
 
     char text[32];
-    sprintf(text, "FPS=%.0f", avg_fps);
+    sprintf(text, "FPS=%.2f", avg_fps);
+
+    if (spent_time >= 1000)
+    {
+        avg_fps = frame_counter * 1000 / spent_time;
+        frame_counter = 0;
+        start_time = ncnn::get_current_time();
+    }
 
     int baseLine = 0;
     cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
@@ -165,7 +176,7 @@ public:
 
 void MyNdkCamera::on_image_render(cv::Mat &rgb) const
 {
-    fps.update();
+    frame_counter++;
 
     // nanodet
     {
