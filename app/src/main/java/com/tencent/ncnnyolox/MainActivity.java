@@ -54,20 +54,20 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, JN
         cameraView.getHolder().setFormat(PixelFormat.RGBA_8888);
         cameraView.getHolder().addCallback(this);
 
-        Button buttonSwitchCamera = (Button) findViewById(R.id.buttonSwitchCamera);
-        buttonSwitchCamera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-
-                int new_facing = 1 - facing;
-
-                ncnnyolox.closeCamera();
-
-                ncnnyolox.openCamera(new_facing);
-
-                facing = new_facing;
-            }
-        });
+//        Button buttonSwitchCamera = (Button) findViewById(R.id.buttonSwitchCamera);
+//        buttonSwitchCamera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View arg0) {
+//
+//                int new_facing = 1 - facing;
+//
+//                ncnnyolox.closeCamera();
+//
+//                ncnnyolox.openCamera(new_facing);
+//
+//                facing = new_facing;
+//            }
+//        });
 
         Spinner spinnerModel = (Spinner) findViewById(R.id.spinnerModel);
         spinnerModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
