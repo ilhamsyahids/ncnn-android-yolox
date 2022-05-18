@@ -2,10 +2,10 @@ project(ncnnyolox)
 
 cmake_minimum_required(VERSION 3.10)
 
-set(OpenCV_DIR /Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/sdk/native/jni)
+set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/sdk/native/jni)
 find_package(OpenCV REQUIRED core imgproc)
 
-set(ncnn_DIR /Users/ilhamsyahids/Personal/Kuliah/TA/inference/ncnn-android-yolox-main/app/src/main/jni/${ANDROID_ABI}/lib/cmake/ncnn)
+set(ncnn_DIR ${CMAKE_SOURCE_DIR}/${ANDROID_ABI}/lib/cmake/ncnn)
 find_package(ncnn REQUIRED)
 
 add_library(ncnnyolox SHARED yoloxncnn.cpp yolox.cpp ndkcamera.cpp)
