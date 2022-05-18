@@ -257,6 +257,12 @@ int Yolox::load(const char *modeltype, int _target_size, const float *_mean_vals
     yolox.opt.blob_allocator = &blob_pool_allocator;
     yolox.opt.workspace_allocator = &workspace_pool_allocator;
 
+    yolox.opt.use_packing_layout = true;
+    yolox.opt.use_bf16_storage = true;
+
+    yolox.opt.use_image_storage = true;
+    yolox.opt.use_tensor_storage = true;
+
     char parampath[256];
     char modelpath[256];
     sprintf(parampath, "%s.param", modeltype);
