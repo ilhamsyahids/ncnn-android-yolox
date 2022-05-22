@@ -43,12 +43,26 @@
         android:drawSelectorOnTop="true"
         android:entries="@array/rate_array" />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
     <CheckBox
         android:id="@+id/checkOnOff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:text="On" />
+
+    <CheckBox
+        android:id="@+id/checkDelegate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:text="Delegate" />
 
     </LinearLayout>
 

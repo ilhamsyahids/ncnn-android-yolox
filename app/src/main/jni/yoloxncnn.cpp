@@ -167,6 +167,7 @@ static ncnn::Mutex lock;
 static unsigned int n_count = 0;
 static unsigned int n_rate;
 static bool is_on = false;
+static bool is_delegate = false;
 static std::vector<Object> objects;
 
 class MyNdkCamera : public NdkCameraWindow
@@ -197,9 +198,10 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
                 }
             }
 
-            g_yolox->draw(rgb, objects, delegate_score);
+            g_yolox->draw(rgb, objects, is_delegate, delegate_score);
 
-            sendResultInference(NULL);
+            if (is_delegate)
+                sendResultInference(NULL);
 
             n_count++;
         }
@@ -249,7 +251,7 @@ extern "C"
     }
 
     // public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu);
-    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu, jint samplingrate, jboolean ison)
+    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu, jint samplingrate, jboolean ison, jboolean isdelegate)
     {
         setEnv(env, thiz);
 
@@ -310,6 +312,7 @@ extern "C"
 
         n_rate = samplingrate + 1;
         is_on = ison;
+        is_delegate = isdelegate;
 
         if (is_on)
             objects.resize(0);

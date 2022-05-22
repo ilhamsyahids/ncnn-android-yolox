@@ -39,6 +39,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, JN
     private final NcnnYolox ncnnyolox = new NcnnYolox(this);
 
     private boolean isOn = false;
+    private boolean isDelegate = false;
+
     private int facing = 1;
 
     private int current_model = 0;
@@ -58,26 +60,20 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, JN
         cameraView.getHolder().setFormat(PixelFormat.RGBA_8888);
         cameraView.getHolder().addCallback(this);
 
-//        Button buttonSwitchCamera = (Button) findViewById(R.id.buttonSwitchCamera);
-//        buttonSwitchCamera.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View arg0) {
-//
-//                int new_facing = 1 - facing;
-//
-//                ncnnyolox.closeCamera();
-//
-//                ncnnyolox.openCamera(new_facing);
-//
-//                facing = new_facing;
-//            }
-//        });
-
         CheckBox checkOnOff = (CheckBox) findViewById(R.id.checkOnOff);
         checkOnOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 isOn = isChecked;
+                reload();
+            }
+        });
+
+        CheckBox checkDelegate = (CheckBox) findViewById(R.id.checkDelegate);
+        checkDelegate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isDelegate = isChecked;
                 reload();
             }
         });
@@ -131,7 +127,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, JN
     }
 
     private void reload() {
-        boolean ret_init = ncnnyolox.loadModel(getAssets(), current_model, current_cpugpu, current_rate, isOn);
+        boolean ret_init = ncnnyolox.loadModel(getAssets(), current_model, current_cpugpu, current_rate, isOn,
+                isDelegate);
         if (!ret_init) {
             Log.e("MainActivity", "ncnnyolox loadModel failed");
         }

@@ -405,7 +405,7 @@ int Yolox::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_t
     return 0;
 }
 
-int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects, unsigned int &delegate_score)
+int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects, bool is_delegate, unsigned int &delegate_score)
 {
     static const char *class_names[] = {
         "glass",
@@ -444,7 +444,7 @@ int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects, unsigned int &
     {
         const Object &obj = objects[i];
 
-        if (!objects_class[obj.label])
+        if (!objects_class[obj.label] && is_delegate)
         {
             objects_class[obj.label] = true;
             delegate_score += pow(2, obj.label);
