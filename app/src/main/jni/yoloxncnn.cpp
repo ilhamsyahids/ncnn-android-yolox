@@ -166,6 +166,7 @@ static Yolox *g_yolox = 0;
 static ncnn::Mutex lock;
 static unsigned int n_count = 0;
 static unsigned int n_rate;
+static bool is_on = false;
 static std::vector<Object> objects;
 
 class MyNdkCamera : public NdkCameraWindow
@@ -186,11 +187,14 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
 
         if (g_yolox)
         {
-            if (n_count % n_rate == 0)
+            if (is_on)
             {
-                n_count = 0;
+                if (n_count % n_rate == 0)
+                {
+                    n_count = 0;
 
-                g_yolox->detect(rgb, objects);
+                    g_yolox->detect(rgb, objects);
+                }
             }
 
             g_yolox->draw(rgb, objects, delegate_score);
@@ -245,7 +249,7 @@ extern "C"
     }
 
     // public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu);
-    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu, jint samplingrate)
+    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu, jint samplingrate, jboolean ison)
     {
         setEnv(env, thiz);
 
@@ -305,6 +309,10 @@ extern "C"
         }
 
         n_rate = samplingrate + 1;
+        is_on = ison;
+
+        if (is_on)
+            objects.resize(0);
 
         return JNI_TRUE;
     }

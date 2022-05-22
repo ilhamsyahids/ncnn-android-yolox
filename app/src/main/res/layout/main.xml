@@ -43,6 +43,13 @@
         android:drawSelectorOnTop="true"
         android:entries="@array/rate_array" />
 
+    <CheckBox
+        android:id="@+id/checkOnOff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="On" />
+
     </LinearLayout>
 
     <SurfaceView

@@ -24,7 +24,7 @@ public class NcnnYolox {
         this.callbackInterface = callBackInterface;
     }
 
-    public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu, int samplingrate);
+    public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu, int samplingrat, boolean isOn);
 
     public native boolean openCamera(int facing);
 

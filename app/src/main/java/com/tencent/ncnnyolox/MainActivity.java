@@ -26,6 +26,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.Spinner;
 
 import android.support.v4.app.ActivityCompat;
@@ -35,6 +37,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, JN
     public static final int REQUEST_CAMERA = 100;
 
     private final NcnnYolox ncnnyolox = new NcnnYolox(this);
+
+    private boolean isOn = false;
     private int facing = 1;
 
     private int current_model = 0;
@@ -68,6 +72,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, JN
 //                facing = new_facing;
 //            }
 //        });
+
+        CheckBox checkOnOff = (CheckBox) findViewById(R.id.checkOnOff);
+        checkOnOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isOn = isChecked;
+                reload();
+            }
+        });
 
         Spinner spinnerModel = (Spinner) findViewById(R.id.spinnerModel);
         spinnerModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -118,7 +131,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, JN
     }
 
     private void reload() {
-        boolean ret_init = ncnnyolox.loadModel(getAssets(), current_model, current_cpugpu, current_rate);
+        boolean ret_init = ncnnyolox.loadModel(getAssets(), current_model, current_cpugpu, current_rate, isOn);
         if (!ret_init) {
             Log.e("MainActivity", "ncnnyolox loadModel failed");
         }
