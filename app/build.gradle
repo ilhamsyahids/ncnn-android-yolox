@@ -5,6 +5,8 @@ android {
     buildToolsVersion "29.0.2"
 
     defaultConfig {
+        vectorDrawables.useSupportLibrary true
+
         applicationId "com.tencent.ncnnyolox"
         archivesBaseName = "$applicationId"
 
@@ -21,4 +23,12 @@ android {
     dependencies {
         implementation 'com.android.support:support-v4:24.0.0'
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'com.github.mik3y:usb-serial-for-android:3.4.4'
 }
