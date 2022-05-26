@@ -60,6 +60,7 @@ public class MainActivity extends Activity
 
     private boolean isOn = false;
     private boolean isDelegate = false;
+    private boolean isCoco = false;
 
     private int facing = 1;
 
@@ -101,10 +102,30 @@ public class MainActivity extends Activity
         });
 
         CheckBox checkDelegate = (CheckBox) findViewById(R.id.checkDelegate);
+        CheckBox checkCoco = (CheckBox) findViewById(R.id.checkCoco);
+
         checkDelegate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    checkCoco.setEnabled(false);
+                } else {
+                    checkCoco.setEnabled(true);
+                }
                 isDelegate = isChecked;
+                reload();
+            }
+        });
+
+        checkCoco.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    checkDelegate.setEnabled(false);
+                } else {
+                    checkDelegate.setEnabled(true);
+                }
+                isCoco = isChecked;
                 reload();
             }
         });
@@ -159,7 +180,7 @@ public class MainActivity extends Activity
 
     private void reload() {
         boolean ret_init = ncnnyolox.loadModel(getAssets(), current_model, current_cpugpu, current_rate, isOn,
-                isDelegate);
+                isDelegate, isCoco);
         if (!ret_init) {
             Log.e("MainActivity", "ncnnyolox loadModel failed");
         }

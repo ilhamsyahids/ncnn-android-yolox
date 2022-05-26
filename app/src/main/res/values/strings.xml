@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">Waste Detection YOLOX NCNN</string>
     <string-array name="model_array">
-        <item>yolox-tiny</item>
         <item>yolox-nano</item>
+        <item>yolox-tiny</item>
     </string-array>
     <string-array name="cpugpu_array">
         <item>CPU</item>

@@ -405,14 +405,21 @@ int Yolox::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_t
     return 0;
 }
 
-int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects, bool is_delegate, unsigned int &delegate_score)
+int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects, bool is_delegate, unsigned int &delegate_score, bool is_coco)
 {
     static const char *class_names[] = {
-        "glass",
-        "metal",
-        "paper",
-        "plastic",
-    };
+        // coco
+        "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
+        "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
+        "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+        "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
+        "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+        "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+        "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
+        "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
+        "hair drier", "toothbrush",
+        // waste
+        "glass", "metal", "paper", "plastic"};
 
     static const unsigned char colors[19][3] = {
         {54, 67, 244},
@@ -458,7 +465,7 @@ int Yolox::draw(cv::Mat &rgb, const std::vector<Object> &objects, bool is_delega
         cv::rectangle(rgb, obj.rect, cc, 2);
 
         char text[256];
-        sprintf(text, "%s %.1f%%", class_names[obj.label], obj.prob * 100);
+        sprintf(text, "%s %.1f%%", class_names[obj.label + (!is_coco ? 80 : 0)], obj.prob * 100);
 
         int baseLine = 0;
         cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);

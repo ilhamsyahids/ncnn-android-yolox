@@ -168,6 +168,7 @@ static unsigned int n_count = 0;
 static unsigned int n_rate;
 static bool is_on = false;
 static bool is_delegate = false;
+static bool is_coco = false;
 static std::vector<Object> objects;
 
 class MyNdkCamera : public NdkCameraWindow
@@ -180,7 +181,7 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
 {
     frame_counter++;
 
-    // nanodet
+    if (is_on)
     {
         ncnn::MutexLockGuard g(lock);
 
@@ -188,17 +189,14 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const
 
         if (g_yolox)
         {
-            if (is_on)
+            if (n_count % n_rate == 0)
             {
-                if (n_count % n_rate == 0)
-                {
-                    n_count = 0;
+                n_count = 0;
 
-                    g_yolox->detect(rgb, objects);
-                }
+                g_yolox->detect(rgb, objects);
             }
 
-            g_yolox->draw(rgb, objects, is_delegate, delegate_score);
+            g_yolox->draw(rgb, objects, is_delegate, delegate_score, is_coco);
 
             if (is_delegate)
                 sendResultInference(NULL);
@@ -251,9 +249,11 @@ extern "C"
     }
 
     // public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu);
-    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu, jint samplingrate, jboolean ison, jboolean isdelegate)
+    JNIEXPORT jboolean JNICALL Java_com_tencent_ncnnyolox_NcnnYolox_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint modelid, jint cpugpu, jint samplingrate, jboolean ison, jboolean isdelegate, jboolean iscoco)
     {
         setEnv(env, thiz);
+
+        objects.clear();
 
         if (modelid < 0 || modelid > 6 || cpugpu < 0 || cpugpu > 1 || samplingrate < 0 || samplingrate > 9)
         {
@@ -266,12 +266,16 @@ extern "C"
 
         const char *modeltypes[] =
             {
-                "yolox-tiny",
                 "yolox-nano",
+                "yolox-tiny",
+                "yolox-nano-coco",
+                "yolox-tiny-coco",
             };
 
         const int target_sizes[] =
             {
+                416,
+                416,
                 416,
                 416,
             };
@@ -288,8 +292,15 @@ extern "C"
                 {1 / (255.f * 0.229f), 1 / (255.f * 0.224f), 1 / (255.f * 0.225f)},
             };
 
-        const char *modeltype = modeltypes[(int)modelid];
-        int target_size = target_sizes[(int)modelid];
+        n_rate = samplingrate + 1;
+        is_on = ison;
+        is_coco = iscoco;
+        is_delegate = !is_coco && isdelegate;
+
+        int model_id = ((int)modelid) + (is_coco ? 2 : 0);
+
+        const char *modeltype = modeltypes[model_id];
+        int target_size = target_sizes[model_id];
         bool use_gpu = (int)cpugpu == 1;
 
         // reload
@@ -309,13 +320,6 @@ extern "C"
                 g_yolox->load(mgr, modeltype, target_size, mean_vals[(int)modelid], norm_vals[(int)modelid], use_gpu);
             }
         }
-
-        n_rate = samplingrate + 1;
-        is_on = ison;
-        is_delegate = isdelegate;
-
-        if (is_on)
-            objects.resize(0);
 
         return JNI_TRUE;
     }
